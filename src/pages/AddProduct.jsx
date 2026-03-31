@@ -1,10 +1,12 @@
 import { TextField, Button, Box, MenuItem } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import * as yup from "yup";
 
 const AddProduct = ({ setProducts }) => {
   const { id } = useParams()
   const navigate = useNavigate();
+  const [errors, setErrors] = useState({});
   const [imageInput, setImageInput] = useState("");
   const [formData, setFormData] = useState({
     title: "",
@@ -36,13 +38,25 @@ const AddProduct = ({ setProducts }) => {
   const getData = () => {
     fetch(`https://dummyjson.com/products/${id}`)
       .then(res => res.json())
-      .then(data => setFormData(data))
+      .then(data => setFormData(prev => ({
+        ...prev,
+        ...data
+      })
+      ))
   }
 
+  useEffect(() => {
+    if (id) {
+      getData()
+    }
+  }, [id])
 
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     try {
+      await validationSchema.validate(formData, { abortEarly: false });
+      setErrors({});
+
       if (!id) {
         fetch("https://dummyjson.com/products/add", {
           method: "POST",
@@ -67,19 +81,25 @@ const AddProduct = ({ setProducts }) => {
           body: JSON.stringify(formData)
         })
           .then(res => res.json())
-          .then(data => {
-            setProducts(prev => [
-              ...prev,
-              { ...data, id: Date.now() }
-            ]);
+          .then(data => setFormData(prev => ({
+            ...prev,
+            ...data
+          })
+          ))
 
-            navigate("/");
-          });
-      }
-    } catch (error) {
-
+        navigate("/");
+      };
     }
-  }
+    catch (err) {
+      const newErrors = {};
+      err.inner.forEach((error) => {
+        newErrors[error.path] = error.message;
+      });
+
+      setErrors(newErrors);
+      return; // остановить отправку
+    }
+  };
   const handleAddImage = () => {
     if (!imageInput) return;
 
@@ -90,6 +110,48 @@ const AddProduct = ({ setProducts }) => {
 
     setImageInput("");
   };
+
+  const validationSchema = yup.object({
+    title: yup.string().required("Product name is required"),
+    description: yup.string().required("Description is required"),
+    brand: yup.string().required("Brand is required"),
+    category: yup.string().required("Category is required"),
+
+    price: yup
+      .number()
+      .typeError("Price must be a number")
+      .required("Price is required")
+      .positive("Price must be positive"),
+
+    discountPercentage: yup
+      .number()
+      .typeError("Discount must be a number")
+      .min(0, "Min 0")
+      .max(100, "Max 100"),
+
+    stock: yup
+      .number()
+      .typeError("Stock must be a number")
+      .required("Stock is required"),
+
+    minimumOrderQuantity: yup
+      .number()
+      .typeError("Must be a number"),
+
+    availabilityStatus: yup.string().required("Select availability"),
+    shippingInformation: yup.string().required("Product name is required"),
+    weight: yup
+      .number()
+      .typeError("Price must be a number")
+      .required("Price is required")
+      .positive("Price must be positive"),
+    warrantyInformation: yup.string().required("Product name is required"),
+    returnPolicy: yup.string().required("Product name is required")
+
+
+
+  });
+
   const categories = [
     {
       value: 'beauty',
@@ -133,20 +195,27 @@ const AddProduct = ({ setProducts }) => {
           noValidate
           autoComplete="off">
           <h3>Basic info:</h3>
-          <TextField className="text-field" name="title" label="Product Name" value={formData.title} onChange={handleChange} />
+          <TextField className="text-field" name="title" label="Product Name" value={formData.title} onChange={handleChange} error={!!errors.title}
+            helperText={errors.title} />
           <TextField
+            name="description"
             label="Description"
             multiline
             rows={4}
+            value={formData.description}
+            onChange={handleChange}
+            error={!!errors.description}
+            helperText={errors.description}
           />
-          <TextField className="text-field" name="brand" label="Brand" value={formData.brand} onChange={handleChange} />
+          <TextField className="text-field" name="brand" label="Brand" value={formData.brand} onChange={handleChange} error={!!errors.brand} helperText={errors.brand} />
           <TextField
             id="outlined-select-category"
             select
             name="category"
             label="Select"
             defaultValue="beauty"
-            helperText="Please select product's category"
+            error={!!errors.category}
+            helperText={errors.category}
             value={formData.category} onChange={handleChange}
           >
             {categories.map((option) => (
@@ -162,8 +231,8 @@ const AddProduct = ({ setProducts }) => {
           noValidate
           autoComplete="off">
           <h3>Pricing:</h3>
-          <TextField className="text-field" name="price" label="Price" value={formData.price} onChange={handleChange} />
-          <TextField className="text-field" name="discountPercentage" label="Discount" value={formData.discountPercentage} onChange={handleChange} />
+          <TextField className="text-field" name="price" label="Price" value={formData.price} onChange={handleChange} error={!!errors.price} helperText={errors.price} />
+          <TextField className="text-field" name="discountPercentage" label="Discount" value={formData.discountPercentage} onChange={handleChange} error={!!errors.discountPercentage} helperText={errors.discountPercentage} />
         </Box>
         <Box
           component="form"
@@ -171,15 +240,16 @@ const AddProduct = ({ setProducts }) => {
           noValidate
           autoComplete="off">
           <h3>Inventory:</h3>
-          <TextField className="text-field" name="stock" label="Stock Quantity" value={formData.stock} onChange={handleChange} />
-          <TextField className="text-field" name="minimumOrderQuantity" label="Minimum Order Quantity" value={formData.minimumOrderQuantity} onChange={handleChange} />
+          <TextField className="text-field" name="stock" label="Stock Quantity" value={formData.stock} onChange={handleChange} error={!!errors.stock} helperText={errors.stock} />
+          <TextField className="text-field" name="minimumOrderQuantity" label="Minimum Order Quantity" value={formData.minimumOrderQuantity} onChange={handleChange} error={!!errors.minimumOrderQuantity} helperText={errors.minimumOrderQuantity} />
           <TextField
             id="outlined-select-availability"
             select
             label="Availability Status"
             name="availabilityStatus"
             defaultValue="in stock"
-            helperText="Please select product's availability"
+            error={!!errors.availabilityStatus}
+            helperText={errors.availabilityStatus}
             value={formData.availabilityStatus} onChange={handleChange}
           >
             {availability.map((option) => (
@@ -195,7 +265,7 @@ const AddProduct = ({ setProducts }) => {
           noValidate
           autoComplete="off">
           <h3>Product Details:</h3>
-          <TextField className="text-field" name="weight" label="Weight" value={formData.weight} onChange={handleChange} />
+          <TextField className="text-field" name="weight" label="Weight" value={formData.weight} onChange={handleChange} error={!!errors.weight} helperText={errors.weight} />
         </Box>
         <Box
           component="form"
@@ -203,9 +273,9 @@ const AddProduct = ({ setProducts }) => {
           noValidate
           autoComplete="off">
           <h3>Shipping & Warranty:</h3>
-          <TextField className="text-field" name="shippingInformation" label="Shipping Information" value={formData.shippingInformation} onChange={handleChange} />
-          <TextField className="text-field" name="warrantyInformation" label="Warranty Information" value={formData.warrantyInformation} onChange={handleChange} />
-          <TextField className="text-field" name="returnPolicy" label="Return Policy" value={formData.returnPolicy} onChange={handleChange} />
+          <TextField className="text-field" name="shippingInformation" label="Shipping Information" value={formData.shippingInformation} onChange={handleChange} error={!!errors.shippingInformation} helperText={errors.shippingInformation} />
+          <TextField className="text-field" name="warrantyInformation" label="Warranty Information" value={formData.warrantyInformation} onChange={handleChange} error={!!errors.warrantyInformation} helperText={errors.warrantyInformation} />
+          <TextField className="text-field" name="returnPolicy" label="Return Policy" value={formData.returnPolicy} onChange={handleChange} error={!!errors.returnPolicy} helperText={errors.returnPolicy} />
         </Box>
         <Box
           component="form"
@@ -224,6 +294,8 @@ const AddProduct = ({ setProducts }) => {
       </div>
     </div>
   );
-};
+}
+
+
 
 export default AddProduct;

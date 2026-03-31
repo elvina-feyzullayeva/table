@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import About from './pages/About';
 import AddProduct from './pages/AddProduct';
 import { useEffect, useState } from 'react';
+import NotFound from './pages/NotFound';
 
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
         <Route path='/' element={<Home products={products} setProducts={setProducts} />} />
         <Route path='/about/:id' element={<About />} />
         <Route path='/product/:id?' element={<AddProduct setProducts={setProducts} />} />
+        <Route path='*' element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   )
