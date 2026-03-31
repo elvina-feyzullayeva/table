@@ -1,38 +1,111 @@
-.App {
-  text-align: center;
+*{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Exo 2", sans-serif;
 }
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.page input{
+  padding: 10px 20px;
+  margin-right: 10px;
+  outline: none;
+  min-width: 60%;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
 }
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.page{
+  padding: 10px;
 }
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.add-item{
+  background-color: black;
+}
+.buttons{
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+
+.modal{
+  padding: 20px;
+}
+
+.item-img{
+  width: 50%;
+
+}
+
+.image, .product-info{
+  width:48%;
+}
+
+.about-page{
+  display:flex;
+  justify-content: space-between;
+  padding: 50px;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.image{
+  background-color: #c3d3da;
+  display: flex;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  border-radius: 14px;
+}
+.image img{
+  width: 80%;
+}
+.reviews{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  width: 100%;
 }
 
-.App-link {
-  color: #61dafb;
+.review{
+  background-color: #c3d3da;
+  border-radius: 14px;
+  padding: 10px;
+  width: calc((100% - 60px) / 3);
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.date, .user-name, .email{
+  font-size: 13px;
+  font-style: italic;
+  color: #494949;
+}
+
+.comment{
+  padding: 12px 0;
+}
+
+.fa-star{
+  color: rgb(255, 174, 0);
+}
+.title, h2{
+  color: #1976d2;
+}
+.add-product-page{
+  padding: 20px;
+}
+.product-image img{
+  width: 100%;
+}
+.product-image{
+  width: 80px;
+}
+.header{
+  padding-bottom: 20px;
+  border-bottom: 1px solid #c3d3da;
+  display: flex;
+  justify-content: space-between;
+}
+.form-page h3{
+  margin: 10px 0;
+}
+.text-field{
+  width: 100%;
+  margin-bottom: 10px;
 }
